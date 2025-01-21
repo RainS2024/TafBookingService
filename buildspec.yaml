@@ -1,0 +1,43 @@
+version: 0.2
+
+phases:
+  pre_build:
+    commands:
+      - echo Setting up the environment...
+      - gradle --version
+      - echo Logging into Docker Hub...
+      - DOCKER_PASSWORD=Selenium@2024
+      - DOCKER_USERNAME=garima.symbiosis@gmail.com
+      - echo "$DOCKER_PASSWORD" | docker login --username "$DOCKER_USERNAME" --password-stdin
+      - echo Logging in to Amazon ECR...
+      - REPOSITORY_URI=654654380350.dkr.ecr.us-east-1.amazonaws.com/tekair/booking
+      - aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin $REPOSITORY_URI
+
+
+  build:
+    commands:
+      - echo Build started on `date`
+      - set -e  # Exit on any error
+      - echo Building UserMS...
+      - ./gradlew clean build -x test
+      - IMAGE_REPO_NAME=booking-service-tekair
+      - IMAGE_TAG=latest
+      - echo "IMAGE_REPO_NAME=$IMAGE_REPO_NAME"
+      - docker build -t $IMAGE_REPO_NAME:$IMAGE_TAG .
+      - docker tag $IMAGE_REPO_NAME:$IMAGE_TAG $REPOSITORY_URI/$IMAGE_REPO_NAME:$IMAGE_TAG
+
+  post_build:
+    commands:
+      - echo Build completed on `date`
+      - echo Pushing the Docker images...
+      - docker push $REPOSITORY_URI/$IMAGE_REPO_NAME:$IMAGE_TAG
+      - echo Writing image definitions file...
+      - printf '[{"name":"%s","imageUri":"%s"}]' "bookingservice" "$REPOSITORY_URI/$IMAGE_REPO_NAME:$IMAGE_TAG" > imagedefinitions.json
+      - echo "Generated imagedefinitions.json:"
+      - cat imagedefinitions.json
+      - echo Build process completed successfully.
+
+artifacts:
+  files:
+    - imagedefinitions.json
+    - build/libs/*.jar
