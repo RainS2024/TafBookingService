@@ -1,5 +1,6 @@
 package com.Tekarch.BookingService.DTO;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.validation.constraints.*;
 import lombok.*;
 
@@ -36,6 +37,7 @@ public class FlightDto {
     @NotNull(message = "Available seats cannot be null")
     @PositiveOrZero(message = "Available seats cannot be negative")
     private Integer availableSeats;
+
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
