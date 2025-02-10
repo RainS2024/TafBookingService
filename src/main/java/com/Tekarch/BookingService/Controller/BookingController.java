@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@CrossOrigin(origins = "http://localhost:4200")
+@CrossOrigin(origins = "http://tekair-frontendapp.s3-website-us-west-1.amazonaws.com/")
 @RequestMapping("/api/bookings")
 public class BookingController {
     @Autowired
